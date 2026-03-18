@@ -1,0 +1,331 @@
+nohup: ignoring input
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to false.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://10.1.24.3:8501
+  External URL: http://134.175.125.228:8501
+
+2026-02-26 20:11:56.358 Uncaught app execution
+Traceback (most recent call last):
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 689, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 115, in <module>
+    res = get_parameter_stats(df_final[p])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 70, in get_parameter_stats
+    low_b, high_b = data.quantile(q_low), data.quantile(q_high)
+                    ^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/series.py", line 2901, in quantile
+    result = df.quantile(q=q, interpolation=interpolation, numeric_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/frame.py", line 12173, in quantile
+    res_df = self.quantile(
+             ^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/frame.py", line 12218, in quantile
+    res = data._mgr.quantile(qs=q, interpolation=interpolation)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/internals/managers.py", line 1568, in quantile
+    blk.quantile(qs=qs, interpolation=interpolation) for blk in self.blocks
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/internals/blocks.py", line 1957, in quantile
+    result = quantile_compat(self.values, np.asarray(qs._values), interpolation)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/array_algos/quantile.py", line 39, in quantile_compat
+    return quantile_with_mask(values, mask, fill_value, qs, interpolation)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/array_algos/quantile.py", line 97, in quantile_with_mask
+    result = _nanpercentile(
+             ^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/array_algos/quantile.py", line 218, in _nanpercentile
+    return np.percentile(
+           ^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py", line 4246, in percentile
+    return _quantile_unchecked(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py", line 4510, in _quantile_unchecked
+    return _ureduce(a,
+           ^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py", line 3880, in _ureduce
+    r = func(a, **kwargs)
+        ^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py", line 4669, in _quantile_ureduce_func
+    result = _quantile(arr,
+             ^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py", line 4807, in _quantile
+    result = _lerp(previous,
+             ^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py", line 4596, in _lerp
+    diff_b_a = b - a
+               ~~^~~
+TypeError: numpy boolean subtract, the `-` operator, is not supported, use the bitwise_xor, the `^` operator, or the logical_xor function instead.
+2026-02-26 20:13:11.007 Uncaught app execution
+Traceback (most recent call last):
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 689, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 115, in <module>
+    res = get_parameter_stats(df_final[p])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 70, in get_parameter_stats
+    low_b, high_b = data.quantile(q_low), data.quantile(q_high)
+                    ^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/series.py", line 2901, in quantile
+    result = df.quantile(q=q, interpolation=interpolation, numeric_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/frame.py", line 12173, in quantile
+    res_df = self.quantile(
+             ^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/frame.py", line 12218, in quantile
+    res = data._mgr.quantile(qs=q, interpolation=interpolation)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/internals/managers.py", line 1568, in quantile
+    blk.quantile(qs=qs, interpolation=interpolation) for blk in self.blocks
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/internals/blocks.py", line 1957, in quantile
+    result = quantile_compat(self.values, np.asarray(qs._values), interpolation)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/array_algos/quantile.py", line 39, in quantile_compat
+    return quantile_with_mask(values, mask, fill_value, qs, interpolation)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/array_algos/quantile.py", line 97, in quantile_with_mask
+    result = _nanpercentile(
+             ^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/pandas/core/array_algos/quantile.py", line 218, in _nanpercentile
+    return np.percentile(
+           ^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py", line 4246, in percentile
+    return _quantile_unchecked(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py", line 4510, in _quantile_unchecked
+    return _ureduce(a,
+           ^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py", line 3880, in _ureduce
+    r = func(a, **kwargs)
+        ^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py", line 4669, in _quantile_ureduce_func
+    result = _quantile(arr,
+             ^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py", line 4807, in _quantile
+    result = _lerp(previous,
+             ^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py", line 4596, in _lerp
+    diff_b_a = b - a
+               ~~^~~
+TypeError: numpy boolean subtract, the `-` operator, is not supported, use the bitwise_xor, the `^` operator, or the logical_xor function instead.
+2026-02-26 20:32:27.844 Script compilation error
+Traceback (most recent call last):
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 591, in _run_script
+    code = self._script_cache.get_bytecode(script_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_cache.py", line 72, in get_bytecode
+    filebody = magic.add_magic(filebody, script_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/magic.py", line 45, in add_magic
+    tree = ast.parse(code, script_path, "exec")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ast.py", line 52, in parse
+    return compile(source, filename, mode, flags,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 150
+    batch_df = pd.DataFrame([batch_info])
+IndentationError: unexpected indent
+2026-02-26 20:32:27.853 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-26 20:32:32.501 Script compilation error
+Traceback (most recent call last):
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 591, in _run_script
+    code = self._script_cache.get_bytecode(script_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_cache.py", line 72, in get_bytecode
+    filebody = magic.add_magic(filebody, script_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/magic.py", line 45, in add_magic
+    tree = ast.parse(code, script_path, "exec")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ast.py", line 52, in parse
+    return compile(source, filename, mode, flags,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 150
+    batch_df = pd.DataFrame([batch_info])
+IndentationError: unexpected indent
+2026-02-26 20:32:32.503 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-27 15:25:44.119 Script compilation error
+Traceback (most recent call last):
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 591, in _run_script
+    code = self._script_cache.get_bytecode(script_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_cache.py", line 72, in get_bytecode
+    filebody = magic.add_magic(filebody, script_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/magic.py", line 45, in add_magic
+    tree = ast.parse(code, script_path, "exec")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ast.py", line 52, in parse
+    return compile(source, filename, mode, flags,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 215
+    st.error(f"❌ 入库失败: {e}")import streamlit as st
+                            ^^^^^^
+SyntaxError: invalid syntax
+2026-02-27 15:25:44.121 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-27 15:25:47.753 Script compilation error
+Traceback (most recent call last):
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 591, in _run_script
+    code = self._script_cache.get_bytecode(script_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_cache.py", line 72, in get_bytecode
+    filebody = magic.add_magic(filebody, script_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/magic.py", line 45, in add_magic
+    tree = ast.parse(code, script_path, "exec")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ast.py", line 52, in parse
+    return compile(source, filename, mode, flags,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 215
+    st.error(f"❌ 入库失败: {e}")import streamlit as st
+                            ^^^^^^
+SyntaxError: invalid syntax
+2026-02-27 15:25:47.754 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-27 15:25:59.620 Script compilation error
+Traceback (most recent call last):
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 591, in _run_script
+    code = self._script_cache.get_bytecode(script_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_cache.py", line 72, in get_bytecode
+    filebody = magic.add_magic(filebody, script_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/magic.py", line 45, in add_magic
+    tree = ast.parse(code, script_path, "exec")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ast.py", line 52, in parse
+    return compile(source, filename, mode, flags,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 215
+    st.error(f"❌ 入库失败: {e}")import streamlit as st
+                            ^^^^^^
+SyntaxError: invalid syntax
+2026-02-27 15:25:59.622 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-27 15:25:59.809 Script compilation error
+Traceback (most recent call last):
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 591, in _run_script
+    code = self._script_cache.get_bytecode(script_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_cache.py", line 72, in get_bytecode
+    filebody = magic.add_magic(filebody, script_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/magic.py", line 45, in add_magic
+    tree = ast.parse(code, script_path, "exec")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ast.py", line 52, in parse
+    return compile(source, filename, mode, flags,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 215
+    st.error(f"❌ 入库失败: {e}")import streamlit as st
+                            ^^^^^^
+SyntaxError: invalid syntax
+2026-02-27 15:25:59.811 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-27 15:27:37.258 Script compilation error
+Traceback (most recent call last):
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 591, in _run_script
+    code = self._script_cache.get_bytecode(script_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_cache.py", line 72, in get_bytecode
+    filebody = magic.add_magic(filebody, script_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/magic.py", line 45, in add_magic
+    tree = ast.parse(code, script_path, "exec")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ast.py", line 52, in parse
+    return compile(source, filename, mode, flags,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 150
+    batch_df = pd.DataFrame([batch_info])
+IndentationError: unexpected indent
+2026-02-27 15:27:37.259 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-27 15:29:13.656 Script compilation error
+Traceback (most recent call last):
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 591, in _run_script
+    code = self._script_cache.get_bytecode(script_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_cache.py", line 72, in get_bytecode
+    filebody = magic.add_magic(filebody, script_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/magic.py", line 45, in add_magic
+    tree = ast.parse(code, script_path, "exec")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ast.py", line 52, in parse
+    return compile(source, filename, mode, flags,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 215
+    st.error(f"❌ 入库失败: {e}")import streamlit as st
+                            ^^^^^^
+SyntaxError: invalid syntax
+2026-02-27 15:29:13.657 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-27 15:30:06.442 Script compilation error
+Traceback (most recent call last):
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 591, in _run_script
+    code = self._script_cache.get_bytecode(script_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_cache.py", line 72, in get_bytecode
+    filebody = magic.add_magic(filebody, script_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/magic.py", line 45, in add_magic
+    tree = ast.parse(code, script_path, "exec")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ast.py", line 52, in parse
+    return compile(source, filename, mode, flags,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 215
+    st.error(f"❌ 入库失败: {e}")import streamlit as st
+                            ^^^^^^
+SyntaxError: invalid syntax
+2026-02-27 15:30:06.444 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-27 15:30:48.886 Script compilation error
+Traceback (most recent call last):
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 591, in _run_script
+    code = self._script_cache.get_bytecode(script_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_cache.py", line 72, in get_bytecode
+    filebody = magic.add_magic(filebody, script_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/magic.py", line 45, in add_magic
+    tree = ast.parse(code, script_path, "exec")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ast.py", line 52, in parse
+    return compile(source, filename, mode, flags,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 215
+    st.error(f"❌ 入库失败: {e}")import streamlit as st
+                            ^^^^^^
+SyntaxError: invalid syntax
+2026-02-27 15:30:48.888 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-27 15:32:29.298 Script compilation error
+Traceback (most recent call last):
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 591, in _run_script
+    code = self._script_cache.get_bytecode(script_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_cache.py", line 72, in get_bytecode
+    filebody = magic.add_magic(filebody, script_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/venv/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/magic.py", line 45, in add_magic
+    tree = ast.parse(code, script_path, "exec")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ast.py", line 52, in parse
+    return compile(source, filename, mode, flags,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/swoller/chip_ai_system/scripts/upload_app.py", line 215
+    st.error(f"❌ 入库失败: {e}")import streamlit as st
+                            ^^^^^^
+SyntaxError: invalid syntax
+2026-02-27 15:32:29.300 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.

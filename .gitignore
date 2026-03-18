@@ -1,0 +1,21 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/.env
+**/__pycache__/
+*.pyc
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Data
+uploads/
+postgres_data/
+redis_data/
+grafana_data/
+
+# IDE
+.vscode/
+*.swp
+dify/
