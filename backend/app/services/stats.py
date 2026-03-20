@@ -1,0 +1,234 @@
+import numpy as np
+import pandas as pd
+from typing import Dict, List, Optional
+from sqlalchemy.orm import Session
+from app.models.test_item import TestItem
+from app.models.bin_summary import BinSummary
+from app.services.parsers.base import ParsedData
+
+
+def calculate_cpk(data: np.ndarray, ll: Optional[float], ul: Optional[float]) -> tuple:
+    """计算 CPK/CPL/CPU"""
+    if len(data) < 2:
+        return None, None, None
+
+    mean = np.mean(data)
+    std = np.std(data, ddof=1)
+
+    if std == 0:
+        return None, None, None
+
+    cpu = float((ul - mean) / (3 * std)) if ul is not None else None
+    cpl = float((mean - ll) / (3 * std)) if ll is not None else None
+
+    if cpu is not None and cpl is not None:
+        cpk = min(cpu, cpl)
+    elif cpu is not None:
+        cpk = cpu
+    elif cpl is not None:
+        cpk = cpl
+    else:
+        cpk = None
+
+    return cpk, cpl, cpu
+
+
+def apply_filter(
+    data: np.ndarray,
+    filter_type: str = 'all',
+    ll: Optional[float] = None,
+    ul: Optional[float] = None,
+    sigma: Optional[float] = None
+) -> np.ndarray:
+    """
+    按Filter类型筛选数据
+    filter_type: all / robust / filter_by_limit / filter_by_sigma
+    """
+    data = data[~np.isnan(data)]
+
+    if filter_type == 'all':
+        return data
+
+    elif filter_type == 'robust':
+        # IQR方法去除离群值
+        q1 = np.percentile(data, 25)
+        q3 = np.percentile(data, 75)
+        iqr = q3 - q1
+        lower = q1 - 1.5 * iqr
+        upper = q3 + 1.5 * iqr
+        return data[(data >= lower) & (data <= upper)]
+
+    elif filter_type == 'filter_by_limit':
+        if ll is not None:
+            data = data[data >= ll]
+        if ul is not None:
+            data = data[data <= ul]
+        return data
+
+    elif filter_type == 'filter_by_sigma':
+        n = sigma or 3.0
+        mean = np.mean(data)
+        std = np.std(data, ddof=1)
+        if std == 0:
+            return data
+        return data[(data >= mean - n * std) & (data <= mean + n * std)]
+
+    return data
+
+
+def calc_param_stats(
+    values: np.ndarray,
+    ll: Optional[float],
+    ul: Optional[float],
+    exec_qty: int
+) -> dict:
+    """计算单个参数的统计数据"""
+    clean = values[~np.isnan(values)]
+
+    if len(clean) == 0:
+        return {
+            'exec_qty': exec_qty,
+            'fail_count': 0,
+            'fail_rate': 0,
+            'yield_rate': 1.0,
+            'mean': None,
+            'stdev': None,
+            'min_val': None,
+            'max_val': None,
+            'cpu': None,
+            'cpl': None,
+            'cpk': None,
+        }
+
+    # 计算fail（超出limit的数量）
+    fail_mask = np.zeros(len(clean), dtype=bool)
+    if ll is not None:
+        fail_mask |= (clean < ll)
+    if ul is not None:
+        fail_mask |= (clean > ul)
+
+    fail_count = int(fail_mask.sum())
+    fail_rate = fail_count / exec_qty if exec_qty > 0 else 0
+    yield_rate = 1 - fail_rate
+
+    mean = float(np.mean(clean))
+    stdev = float(np.std(clean, ddof=1)) if len(clean) > 1 else 0.0
+    min_val = float(np.min(clean))
+    max_val = float(np.max(clean))
+
+    cpk, cpl, cpu = calculate_cpk(clean, ll, ul)
+
+    return {
+        'exec_qty': exec_qty,
+        'fail_count': fail_count,
+        'fail_rate': round(fail_rate, 6),
+        'yield_rate': round(yield_rate, 6),
+        'mean': round(mean, 6),
+        'stdev': round(stdev, 6),
+        'min_val': round(min_val, 6),
+        'max_val': round(max_val, 6),
+        'cpu': round(cpu, 6) if cpu is not None else None,
+        'cpl': round(cpl, 6) if cpl is not None else None,
+        'cpk': round(cpk, 6) if cpk is not None else None,
+    }
+
+def save_stats_to_db(
+    lot_id: int,
+    parsed: ParsedData,
+    db: Session,
+    data_range: str = 'final'
+):
+    df = parsed.data.copy()
+
+    if 'X_COORD' in df.columns and 'Y_COORD' in df.columns:
+        has_coords = df['X_COORD'].notna().any()
+    else:
+        has_coords = False
+
+    # Final 去重
+    if has_coords:
+        df_final = df.drop_duplicates(subset=['X_COORD', 'Y_COORD'], keep='last').reset_index(drop=True)
+        df_original = df.drop_duplicates(subset=['X_COORD', 'Y_COORD'], keep='first').reset_index(drop=True)
+    else:
+        df_final = df.copy()
+        df_original = df.copy()
+
+    # 删除旧数据
+    db.query(TestItem).filter(TestItem.lot_id == lot_id).delete()
+    db.query(BinSummary).filter(BinSummary.lot_id == lot_id).delete()
+
+    # ── 参数统计（用 final 数据）──────────────────────────
+    df_for_stats = df_final
+    sites = sorted(df_for_stats['SITE_NUM'].dropna().unique().astype(int).tolist())
+
+    test_items_to_add = []
+    for idx, param_name in enumerate(parsed.param_names):
+        if param_name not in df_for_stats.columns:
+            continue
+        ll = parsed.param_ll.get(param_name)
+        ul = parsed.param_ul.get(param_name)
+        unit = parsed.param_units.get(param_name, '')
+
+        all_values = df_for_stats[param_name].values.astype(float)
+        exec_qty = int(df_for_stats[param_name].notna().sum())
+        stats = calc_param_stats(all_values, ll, ul, exec_qty)
+        test_items_to_add.append(TestItem(
+            lot_id=lot_id, item_number=idx+1, site=0,
+            item_name=param_name, unit=unit,
+            lower_limit=ll, upper_limit=ul, **stats
+        ))
+
+        for site in sites:
+            site_df = df_for_stats[df_for_stats['SITE_NUM'] == site]
+            site_values = site_df[param_name].values.astype(float)
+            site_exec_qty = int(site_df[param_name].notna().sum())
+            site_stats = calc_param_stats(site_values, ll, ul, site_exec_qty)
+            test_items_to_add.append(TestItem(
+                lot_id=lot_id, item_number=idx+1, site=int(site),
+                item_name=param_name, unit=unit,
+                lower_limit=ll, upper_limit=ul, **site_stats
+            ))
+
+    db.bulk_save_objects(test_items_to_add)
+    print(f"[stats] test_items 写入完成")
+
+    # ── Bin 统计（Final 和 Original 各存一份）────────────
+    bin_items_to_add = []
+
+    for dr_label, df_dr in [('final', df_final), ('original', df_original)]:
+        sites_dr = sorted(df_dr['SITE_NUM'].dropna().unique().astype(int).tolist())
+        total = len(df_dr)
+
+        # All Sites
+        bin_counts = df_dr['SOFT_BIN'].value_counts()
+        for bin_num, count in bin_counts.items():
+            bin_def = parsed.bin_definitions.get(int(bin_num), {})
+            bin_items_to_add.append(BinSummary(
+                lot_id=lot_id,
+                bin_number=int(bin_num),
+                bin_name=bin_def.get('name', f'Bin{int(bin_num)}'),
+                site=0,
+                count=int(count),
+                percentage=round(count / total * 100, 4) if total > 0 else 0,
+                data_range=dr_label
+            ))
+
+        # 各 Site
+        for site in sites_dr:
+            site_df = df_dr[df_dr['SITE_NUM'] == site]
+            site_total = len(site_df)
+            for bin_num, count in site_df['SOFT_BIN'].value_counts().items():
+                bin_def = parsed.bin_definitions.get(int(bin_num), {})
+                bin_items_to_add.append(BinSummary(
+                    lot_id=lot_id,
+                    bin_number=int(bin_num),
+                    bin_name=bin_def.get('name', f'Bin{int(bin_num)}'),
+                    site=int(site),
+                    count=int(count),
+                    percentage=round(count / site_total * 100, 4) if site_total > 0 else 0,
+                    data_range=dr_label
+                ))
+
+    db.bulk_save_objects(bin_items_to_add)
+    db.commit()
+    print(f"[stats] bin_summary 写入完成")
