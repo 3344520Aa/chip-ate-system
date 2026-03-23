@@ -409,7 +409,7 @@ def parse_acco(filepath: str, tester: str) -> ParsedData:
 
     # SBin 定义（兼容逗号分隔和空格分隔）
     _sbin_re = re.compile(
-        r'SBin\[(\d+)\][\s,]+(\S*?)[\s,]+\d+[\s,]+[\d.]+%[\s,]*(\d*)',
+        r'SBin$$(\d+)$$[\s,]+(\S*?)[\s,]+\d+[\s,]+[\d.]+%[\s,]*(\d*)',
         re.IGNORECASE
     )
     for line in header_lines:
@@ -428,6 +428,22 @@ def parse_acco(filepath: str, tester: str) -> ParsedData:
 
     col_header_clean = [c.strip()
                         for c in header_lines[col_header_idx].strip().split(',')]
+
+    # LBS 等格式：列头行只有前几列有名字，参数列为空
+    # 需要从上方的 "Test Name" 行获取参数名
+    if tester == 'LBS' or all(not c for c in col_header_clean[5:]):
+        for line in header_lines[:col_header_idx]:
+            cols = [c.strip() for c in line.strip().split(',')]
+            if cols[0] == 'Test Name' and len(cols) > 5 and cols[5]:
+                # 用 Test Name 行的参数名补齐列头
+                for j in range(5, len(cols)):
+                    if j < len(col_header_clean):
+                        col_header_clean[j] = cols[j]
+                    else:
+                        col_header_clean.append(cols[j])
+                print(f"[parser] LBS模式: 从 Test Name 行补齐 {len(cols)-5} 个参数名")
+                break
+
     rename_map       = _normalize_columns(col_header_clean)
 
     def _find_std_col(std_name: str) -> Optional[int]:
@@ -449,27 +465,44 @@ def parse_acco(filepath: str, tester: str) -> ParsedData:
     data_start_col = max(key_cols) + 1
 
     # ── 4. 限值行识别 ─────────────────────────────────────────────
-    # 取列头行（在 raw_lines 中的实际位置）之后到数据行之前的行
+    # 先在列头行和数据行之间找（标准 ACCO 格式）
     col_header_raw_idx = raw_lines.index(header_lines[col_header_idx])
     between_lines = [
         ln for ln in raw_lines[col_header_raw_idx + 1: data_start_row]
         if _col0(ln).strip().strip('"')   # 过滤空行和 "" 占位行
     ]
     limit_rows = _extract_limit_rows(between_lines)
+
+    # LBS 等格式：限值行在列头行上方，需要到表头区找
+    if not any(limit_rows.values()):
+        above_lines = raw_lines[:col_header_raw_idx]
+        limit_rows = _extract_limit_rows(above_lines)
+
     ul_line   = limit_rows['upper']
     ll_line   = limit_rows['lower']
     unit_line = limit_rows['unit']
 
     # ── 5. QA 参数截断 + 提取参数信息 ────────────────────────────
+    # 处理重复列名：加后缀去重
+    seen = {}
+    unique_names = []
+    for name in col_header_clean:
+        if name in seen:
+            seen[name] += 1
+            unique_names.append(f"{name}.{seen[name]}")
+        else:
+            seen[name] = 0
+            unique_names.append(name)
+
     valid_count = _get_valid_param_count(raw_lines, data_start_row, data_start_col)
-    param_end   = data_start_col + valid_count if valid_count else len(col_header_clean)
+    param_end   = data_start_col + valid_count if valid_count else len(unique_names)
     print(f"[parser] 有效参数: {valid_count}, "
-          f"表头总参数: {len(col_header_clean) - data_start_col}")
+          f"表头总参数: {len(unique_names) - data_start_col}")
 
     for i in range(data_start_col, param_end):
-        if i >= len(col_header_clean):
+        if i >= len(unique_names):
             break
-        pname = col_header_clean[i]
+        pname = unique_names[i]
         if not pname:
             continue
         result.param_names.append(pname)
@@ -515,7 +548,7 @@ def parse_acco(filepath: str, tester: str) -> ParsedData:
             filepath,
             skiprows=data_start_row,
             header=None,
-            names=col_header_clean,
+            names=unique_names,
             on_bad_lines='skip',
             dtype=str,
             encoding='utf-8',

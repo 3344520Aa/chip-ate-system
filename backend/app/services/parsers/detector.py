@@ -25,7 +25,7 @@ _TESTER_PATTERNS: list[tuple[str, str]] = [
     ('STS8200', 'STS8200'),
     ('T2K',     '[Tester],T2K'),
     ('TMT',     '[Tester],TMT'),
-    ('LBS',     'sLotsetupinfo'),       # LBS log2csv 转换格式
+    ('STS8200',     'sLotsetupinfo'),       # LBS log2csv 转换格式
 ]
 
 
@@ -34,7 +34,7 @@ def detect_tester(filepath: str) -> str:
     识别 ATE 机台类型。
     读取文件前 5 行内容，按优先级逐一匹配关键字。
 
-    返回值：'STS8200' | 'STS8300' | 'ETS364' | 'T2K' | 'TMT' | 'LBS' | 'UNKNOWN'
+    返回值：'STS8200' | 'STS8300' | 'ETS364B' | 'T2K' | 'TMT' | 'LBS' | 'UNKNOWN'
     """
     try:
         with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:

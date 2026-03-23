@@ -3,6 +3,7 @@ import pandas as pd
 from typing import Dict, List, Optional
 from sqlalchemy.orm import Session
 from app.models.test_item import TestItem
+from app.models.lot import Lot
 from app.models.bin_summary import BinSummary
 from app.services.parsers.base import ParsedData
 
@@ -133,29 +134,79 @@ def calc_param_stats(
     }
 
 def save_stats_to_db(
-    lot_id: int,
+    lot: Lot,
     parsed: ParsedData,
     db: Session,
-    data_range: str = 'final'
+    PASS_BINS: List[int]
 ):
     df = parsed.data.copy()
 
     if 'X_COORD' in df.columns and 'Y_COORD' in df.columns:
-        has_coords = df['X_COORD'].notna().any()
+        #has_coords = df['X_COORD'].notna().any()
+        has_coords =(
+            df['X_COORD'].notna().any() and
+            ((df['X_COORD'] != 0) | (df['Y_COORD'] != 0)).any()
+        )
     else:
         has_coords = False
 
-    # Final 去重
     if has_coords:
-        df_final = df.drop_duplicates(subset=['X_COORD', 'Y_COORD'], keep='last').reset_index(drop=True)
+        # Ensure 'SOFT_BIN' is numeric for robust comparison
+        df['SOFT_BIN'] = pd.to_numeric(df['SOFT_BIN'], errors='coerce').fillna(-1).astype(int)
+
+        # Create df_original (first occurrence)
         df_original = df.drop_duplicates(subset=['X_COORD', 'Y_COORD'], keep='first').reset_index(drop=True)
+
+        # Create df_final based on the complex rule
+        # Step 1: Get the last occurrence of each (X_COORD, Y_COORD) pair, retaining all columns
+        df_final_base = df.drop_duplicates(subset=['X_COORD', 'Y_COORD'], keep='last').copy()
+
+        # Step 2: For each (X_COORD, Y_COORD) pair, check if any of its SOFT_BINs were PASS
+        # This will create a Series where the index is (X_COORD, Y_COORD) and value is True/False
+        ever_pass = df.groupby(['X_COORD', 'Y_COORD'])['SOFT_BIN'].apply(lambda x: x.isin(PASS_BINS).any())
+
+        # Step 3: Update SOFT_BIN in df_final_base based on 'ever_pass'
+        df_final_base = df_final_base.set_index(['X_COORD', 'Y_COORD'])
+        df_final_base['SOFT_BIN'] = df_final_base.index.map(lambda idx: PASS_BINS[0] if ever_pass.loc[idx] else df_final_base.loc[idx, 'SOFT_BIN'])
+        df_final = df_final_base.reset_index()
+
+        # --- Debugging: Investigate chips that are never PASS (ever_pass is False) ---
+        never_pass_coords = ever_pass[~ever_pass].index.tolist()
+        if never_pass_coords:
+            print(f"DEBUG: Found {len(never_pass_coords)} unique (X,Y) coords that never passed (SOFT_BIN not in {PASS_BINS}):")
+            # For these coords, get their full SOFT_BIN history from the original df
+            never_pass_history = df[df.set_index(['X_COORD', 'Y_COORD']).index.isin(never_pass_coords)][['X_COORD', 'Y_COORD', 'SOFT_BIN']].drop_duplicates().sort_values(by=['X_COORD', 'Y_COORD'])
+            print(f"DEBUG: SOFT_BIN history for never-pass chips:\n{never_pass_history.to_string()}")
+        else:
+            print("DEBUG: All chips have at least one PASS SOFT_BIN in their history.")
+        # --- End Debugging ---
+
     else:
+        # If no coordinates, then original and final are the same as the raw data
         df_final = df.copy()
         df_original = df.copy()
 
+    # 计算 final 统计
+    lot.die_count = len(df_final)
+    # The conversion to numeric and print for df_final is now done above, within the if has_coords block for the base df
+    print(f"DEBUG: df_final SOFT_BIN unique values after conversion: {df_final['SOFT_BIN'].unique()}")
+    print(f"DEBUG: df_final SOFT_BIN pass/fail check (isin {PASS_BINS}): {df_final['SOFT_BIN'].isin(PASS_BINS).value_counts()}")
+    lot.pass_count = int(df_final['SOFT_BIN'].isin(PASS_BINS).sum())
+    lot.fail_count = lot.die_count - lot.pass_count
+    lot.yield_rate = lot.pass_count / lot.die_count if lot.die_count > 0 else 0
+
+    # 计算 original 统计
+    lot.original_die_count = len(df_original)
+    # The conversion to numeric and print for df_original is now done above, within the if has_coords block for the base df
+    print(f"DEBUG: df_original SOFT_BIN unique values after conversion: {df_original['SOFT_BIN'].unique()}")
+    print(f"DEBUG: df_original SOFT_BIN pass/fail check (isin {PASS_BINS}): {df_original['SOFT_BIN'].isin(PASS_BINS).value_counts()}")
+    lot.original_pass_count = int(df_original['SOFT_BIN'].isin(PASS_BINS).sum())
+    lot.original_fail_count = lot.original_die_count - lot.original_pass_count
+    lot.original_yield_rate = lot.original_pass_count / lot.original_die_count if lot.original_die_count > 0 else 0
+
     # 删除旧数据
-    db.query(TestItem).filter(TestItem.lot_id == lot_id).delete()
-    db.query(BinSummary).filter(BinSummary.lot_id == lot_id).delete()
+    db.query(TestItem).filter(TestItem.lot_id == lot.id).delete()
+    db.query(BinSummary).filter(BinSummary.lot_id == lot.id).delete()
 
     # ── 参数统计（用 final 数据）──────────────────────────
     df_for_stats = df_final
@@ -173,7 +224,7 @@ def save_stats_to_db(
         exec_qty = int(df_for_stats[param_name].notna().sum())
         stats = calc_param_stats(all_values, ll, ul, exec_qty)
         test_items_to_add.append(TestItem(
-            lot_id=lot_id, item_number=idx+1, site=0,
+            lot_id=lot.id, item_number=idx+1, site=0,
             item_name=param_name, unit=unit,
             lower_limit=ll, upper_limit=ul, **stats
         ))
@@ -184,7 +235,7 @@ def save_stats_to_db(
             site_exec_qty = int(site_df[param_name].notna().sum())
             site_stats = calc_param_stats(site_values, ll, ul, site_exec_qty)
             test_items_to_add.append(TestItem(
-                lot_id=lot_id, item_number=idx+1, site=int(site),
+                lot_id=lot.id, item_number=idx+1, site=int(site),
                 item_name=param_name, unit=unit,
                 lower_limit=ll, upper_limit=ul, **site_stats
             ))
@@ -204,7 +255,7 @@ def save_stats_to_db(
         for bin_num, count in bin_counts.items():
             bin_def = parsed.bin_definitions.get(int(bin_num), {})
             bin_items_to_add.append(BinSummary(
-                lot_id=lot_id,
+                lot_id=lot.id,
                 bin_number=int(bin_num),
                 bin_name=bin_def.get('name', f'Bin{int(bin_num)}'),
                 site=0,
@@ -220,7 +271,7 @@ def save_stats_to_db(
             for bin_num, count in site_df['SOFT_BIN'].value_counts().items():
                 bin_def = parsed.bin_definitions.get(int(bin_num), {})
                 bin_items_to_add.append(BinSummary(
-                    lot_id=lot_id,
+                    lot_id=lot.id,
                     bin_number=int(bin_num),
                     bin_name=bin_def.get('name', f'Bin{int(bin_num)}'),
                     site=int(site),

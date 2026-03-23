@@ -127,13 +127,11 @@ async def _process_upload(file: UploadFile, db: Session):
 def _quick_parse_meta(csv_path: str, tester: str) -> dict:
     """快速读取表头元数据，不解析数据部分"""
     from app.services.parsers.acco_parser import parse_acco
-    from app.services.parsers.ets_parser import parse_ets
 
-    if tester in ('STS8200', 'STS8300'):
-        result = parse_acco(csv_path, tester)
-    elif tester == 'ETS':
-        result = parse_ets(csv_path)
-    else:
+    # 所有格式统一走 parse_acco，它能处理 ETS364/LBS/T2K/UNKNOWN 的表头
+    result = parse_acco(csv_path, tester)
+
+    if result.error:
         return {}
 
     return {
@@ -169,18 +167,11 @@ def _parse_and_save(lot_id: int, csv_path: str, db: Session):
         print(f"[parse] Parquet保存完成 {parquet_path}")
 
         lot.parquet_path = parquet_path
-        lot.die_count = len(result.data)
+
+        # BIN 1/2 为 PASS，其他为 FAIL（业务规则，不依赖表头）
+        PASS_BINS = [1, 2]
+
         lot.station_count = int(result.data['SITE_NUM'].nunique())
-
-        pass_bins = [
-            k for k, v in result.bin_definitions.items()
-            if v.get('hard_bin') == 1
-        ] if result.bin_definitions else [1]
-
-        lot.pass_count = int(result.data['SOFT_BIN'].isin(pass_bins).sum())
-        lot.fail_count = lot.die_count - lot.pass_count
-        lot.yield_rate = lot.pass_count / lot.die_count if lot.die_count > 0 else 0
-        print(f"[parse] 良率计算完成 yield={lot.yield_rate}")
 
         if lot.program:
             from app.models.product_mapping import ProductMapping
@@ -194,7 +185,7 @@ def _parse_and_save(lot_id: int, csv_path: str, db: Session):
                     lot.product_name = mapping.product_name
 
         from app.services.stats import save_stats_to_db
-        save_stats_to_db(lot.id, result, db, data_range='final')
+        save_stats_to_db(lot, result, db, PASS_BINS)
         print(f"[parse] 统计计算完成")
 
         lot.status = 'processed'
